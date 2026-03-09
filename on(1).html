@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Candidate Onboarding Form</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="on(1).css" rel="stylesheet"/>
+</head>
+
+<body>
+
+<!-- TOAST CONTAINER -->
+<div id="toastContainer"></div>
+
+<div class="form-container">
+
+<!-- PROGRESS BAR -->
+<div id="progressBarWrapper">
+  <div id="progressBar">
+    <div class="prog-step" data-step="1" onclick="goToStep(1)">
+      <div class="prog-dot">1</div>
+      <div class="prog-label">Personal</div>
+    </div>
+    <div class="prog-step" data-step="2" onclick="goToStep(2)">
+      <div class="prog-dot">2</div>
+      <div class="prog-label">Experience</div>
+    </div>
+    <div class="prog-step" data-step="3" onclick="goToStep(3)">
+      <div class="prog-dot">3</div>
+      <div class="prog-label">Education</div>
+    </div>
+    <div class="prog-step" data-step="4" onclick="goToStep(4)">
+      <div class="prog-dot">4</div>
+      <div class="prog-label">Family</div>
+    </div>
+    <div class="prog-step" data-step="5" onclick="goToStep(5)">
+      <div class="prog-dot">5</div>
+      <div class="prog-label">Details &amp; Docs</div>
+    </div>
+  </div>
+</div>
+
+<!-- DRAFT BANNER -->
+<div id="draftBanner">
+  <span>💾</span>
+  <span style="flex:1;">You have a saved draft. Would you like to restore it?</span>
+  <button class="draft-yes" onclick="restoreDraft()">Restore</button>
+  <button class="draft-no" onclick="dismissDraft()">Dismiss</button>
+</div>
+
+<form id="candidateForm">
+
+<h1>P&C PROJECTS PRIVATE LIMITED</h1>
+<h2 style="text-align:center; border:none; margin-top:4px;">Candidate Onboarding Form</h2>
+
+<!-- ERROR NOTIFICATION -->
+<div id="errorNotification" style="display:none; background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:16px; margin:20px 0; animation:slideIn 0.3s ease-out;">
+  <div style="display:flex; align-items:flex-start; gap:12px;">
+    <div style="color:#dc2626; font-weight:700; font-size:20px; flex-shrink:0;">⚠</div>
+    <div>
+      <h4 style="color:#dc2626; font-weight:700; margin:0 0 10px 0; font-size:15px;">Please fix the following errors:</h4>
+      <ul id="errorList" style="list-style:none; margin:0; padding:0;"></ul>
+    </div>
+  </div>
+</div>
+
+<!-- STEPS CONTAINER -->
+<div id="stepsContainer">
+
+  <!-- STEP 1 – PERSONAL DETAILS -->
+  <div class="step" id="step-1">
+    <div id="section-personal" class="section-accordion">
+      <div class="accordion-header open" onclick="toggleAccordion(this)">
+        <div class="accordion-title">
+          <span>👤</span> Personal Details
+          <span class="accordion-badge" id="badge-personal">Required</span>
+        </div>
+        <span class="accordion-arrow">▼</span>
+      </div>
+      <div class="accordion-body open">
+        <label for="full_name">Full Name *</label>
+        <div class="field-wrapper">
+          <input type="text" name="full_name" id="full_name" required placeholder="Enter your full name">
+          <span class="field-icon" id="icon-full_name"></span>
+        </div>
+        <div class="field-hint" id="hint-full_name"></div>
+
+        <label for="dob_year">Date of Birth *</label>
+        <div class="field-wrapper">
+          <input type="date" name="dob_year" id="dob_year" required>
+          <span class="field-icon" id="icon-dob_year"></span>
+        </div>
+        <div class="field-hint" id="hint-dob_year"></div>
+
+        <label for="marital_status">Marital Status *</label>
+        <select name="marital_status" id="marital_status" onchange="toggleMarriageYear()" required>
+          <option value="">-- Select --</option>
+          <option value="Single">Single</option>
+          <option value="Married">Married</option>
+        </select>
+        <div id="marriageYearField" style="display:none;">
+          <label for="marriage_year">Marriage Year</label>
+          <input type="number" name="marriage_year" id="marriage_year" min="1900" placeholder="YYYY">
+        </div>
+
+        <label for="applied_post">Designation in P&C now *</label>
+        <div class="field-wrapper">
+          <input type="text" name="applied_post" id="applied_post" required placeholder="Enter your designation">
+          <span class="field-icon" id="icon-applied_post"></span>
+        </div>
+        <div class="field-hint" id="hint-applied_post"></div>
+
+        <label for="present_address">Present Address (with Pincode) *</label>
+        <textarea name="present_address" id="present_address" rows="2" required placeholder="Door No, Street, City, State - Pincode" maxlength="300"></textarea>
+        <div class="char-counter" id="cc-present_address">0 / 300</div>
+
+        <label for="permanent_address">
+          Permanent Address (with Pincode) *
+          <label style="display:inline-flex; align-items:center; cursor:pointer; font-size:13px; color:#5a7a9c; font-weight:500; margin:0 0 0 12px;">
+            <input type="checkbox" id="copyAddressBtn" style="margin-right:5px; accent-color:#2d5a8c;"> Same as Present
+          </label>
+        </label>
+        <textarea name="permanent_address" id="permanent_address" rows="2" required placeholder="Door No, Street, City, State - Pincode" maxlength="300"></textarea>
+        <div class="char-counter" id="cc-permanent_address">0 / 300</div>
+
+        <label for="phone_no">Mobile Number *</label>
+        <div class="field-wrapper">
+          <input type="tel" name="phone_no" id="phone_no" required placeholder="10-digit mobile number" maxlength="10" pattern="[0-9]{10}">
+          <span class="field-icon" id="icon-phone_no"></span>
+        </div>
+        <div class="field-hint" id="hint-phone_no">Enter 10-digit mobile number</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2 – EXPERIENCE -->
+  <div class="step" id="step-2">
+    <div id="section-experience" class="section-accordion">
+      <div class="accordion-header open" onclick="toggleAccordion(this)">
+        <div class="accordion-title">
+          <span>💼</span> Professional Experience
+          <span class="accordion-badge" id="badge-experience">Required</span>
+        </div>
+        <span class="accordion-arrow">▼</span>
+      </div>
+      <div class="accordion-body open">
+        <label for="experience_status">Are you a Fresher or Experienced? *</label>
+        <select id="experience_status" name="experience_status" onchange="toggleExperienceTable()" required>
+          <option value="">Select</option>
+          <option value="Fresher">Fresher</option>
+          <option value="Experienced">Experienced</option>
+        </select>
+        <div id="experienceTableContainer" style="display:none; margin-top:12px; padding:18px; background:#f8f9fb; border-left:4px solid #2d5a8c; border-radius:8px;">
+          <label style="font-weight:700; margin-bottom:12px;">Experience Details *</label>
+          <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
+            <input type="text" id="projectname" placeholder="Project Name">
+            <input type="text" id="projectlocation" placeholder="Project Location">
+            <input type="text" id="projectvalue" placeholder="Project Value (e.g. 50 Cr)">
+            <input type="text" id="previouscompany" placeholder="Company Name">
+            <input type="text" id="companyoffice" placeholder="Company Head Office City">
+            <input type="text" id="designation" placeholder="Designation">
+            <input type="text" id="role" placeholder="Roles & Responsibilities">
+            <div style="display:flex; gap:12px; flex-wrap:wrap;">
+              <div style="flex:1; min-width:180px;">
+                <label for="frommonth" style="margin:0 0 4px 0; font-size:13px;">From (Month-Year)</label>
+                <input type="month" id="frommonth" name="frommonth">
+              </div>
+              <div style="flex:1; min-width:180px;">
+                <label for="tomonth" style="margin:0 0 4px 0; font-size:13px;">To (Month-Year)</label>
+                <input type="month" id="tomonth" name="tomonth">
+              </div>
+            </div>
+          </div>
+          <button type="button" onclick="addExperience()" style="margin-top:14px;">+ Add Experience</button>
+          <ul id="experiencePreview" style="margin-top:10px; list-style:none; padding:0;"></ul>
+          <label style="margin-top:12px;">Total Experience (Years):
+            <input type="text" name="total_experience" id="totalExperience" readonly style="width:80px; display:inline-block; margin-left:8px;" aria-required="false">
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3 – EDUCATION -->
+  <div class="step" id="step-3">
+    <div id="section-education" class="section-accordion">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div class="accordion-title">
+          <span>🎓</span> Education
+          <span class="accordion-badge" id="badge-education">Required</span>
+        </div>
+        <span class="accordion-arrow">▼</span>
+      </div>
+      <div class="accordion-body">
+        <!-- SSLC -->
+        <div id="sslcSection" class="edu-card">
+          <div class="edu-header">
+            <h4 class="edu-title">01. SSLC (10th)</h4>
+          </div>
+          <div class="edu-fields">
+            <div class="edu-field-group">
+              <label for="sslcSchool">School Name</label>
+              <input type="text" id="sslcSchool" name="sslcSchool" placeholder="Enter school name" class="edu-input">
+            </div>
+            <div class="edu-field-group">
+              <label for="sslcUpto">Studied Upto</label>
+              <select id="sslcUpto" name="sslcUpto" class="edu-input">
+                <option value="">Select</option>
+                <option value="10th">10th</option>
+                <option value="9th">9th</option>
+                <option value="8th">8th</option>
+                <option value="7th">7th</option>
+              </select>
+            </div>
+            <div class="edu-field-group">
+              <label for="sslcBoard">Board</label>
+              <select id="sslcBoard" name="sslcBoard" class="edu-input" onchange="toggleOtherInput('sslcBoard','sslcBoardOther')">
+                <option value="">Select</option>
+                <option value="CBSE">CBSE</option>
+                <option value="State Board">State Board</option>
+                <option value="ICSE">ICSE</option>
+                <option value="Other">Other</option>
+              </select>
+              <input type="text" id="sslcBoardOther" name="sslcBoardOther" placeholder="Specify board" class="edu-input" style="display:none; margin-top:8px;">
+            </div>
+            <div class="edu-field-group">
+              <label for="sslcMedium">Medium</label>
+              <select id="sslcMedium" name="sslcMedium" class="edu-input" onchange="toggleOtherInput('sslcMedium','sslcMediumOther')">
+                <option value="">Select</option>
+                <option value="Tamil">Tamil</option>
+                <option value="English">English</option>
+                <option value="Hindi">Hindi</option>
+                <option value="Other">Other</option>
+              </select>
+              <input type="text" id="sslcMediumOther" name="sslcMediumOther" placeholder="Specify medium" class="edu-input" style="display:none; margin-top:8px;">
+            </div>
+            <div class="edu-field-group">
+              <label for="sslcYear">Year of Passing</label>
+              <input type="number" id="sslcYear" name="sslcYear" placeholder="YYYY" class="edu-input" min="1950" max="2100">
+            </div>
+          </div>
+        </div>
+        <!-- HSC -->
+        <div id="hscSection" class="edu-card">
+          <div class="edu-header">
+            <h4 class="edu-title">02. HSC (12th)</h4>
+            <label class="edu-checkbox-label">
+              <input type="checkbox" id="hscNilChk" class="edu-checkbox" onchange="toggleEducationFields('hsc', this.checked)">
+              <span>Not applicable</span>
+            </label>
+          </div>
+          <div class="edu-fields">
+            <div class="edu-field-group">
+              <label for="hscSchool">School/College Name</label>
+              <input type="text" id="hscSchool" placeholder="Enter school name" class="edu-input">
+            </div>
+            <div class="edu-field-group">
+              <label for="hscStream">Stream</label>
+              <select id="hscStream" class="edu-input" onchange="toggleOtherInput('hscStream','hscStreamOther')">
+                <option value="">Select</option>
+                <option value="Science">Science</option>
+                <option value="Commerce">Commerce</option>
+                <option value="Arts">Arts</option>
+                <option value="Other">Other</option>
+              </select>
+              <input type="text" id="hscStreamOther" placeholder="Specify stream" class="edu-input" style="display:none; margin-top:8px;">
+            </div>
+            <div class="edu-field-group">
+              <label for="hscBoard">Board</label>
+              <select id="hscBoard" class="edu-input" onchange="toggleOtherInput('hscBoard','hscBoardOther')">
+                <option value="">Select</option>
+                <option value="CBSE">CBSE</option>
+                <option value="State Board">State Board</option>
+                <option value="ICSE">ICSE</option>
+                <option value="IB">IB</option>
+                <option value="Other">Other</option>
+              </select>
+              <input type="text" id="hscBoardOther" placeholder="Specify board" class="edu-input" style="display:none; margin-top:8px;">
+            </div>
+            <div class="edu-field-group">
+              <label for="hscMedium">Medium</label>
+              <select id="hscMedium" class="edu-input" onchange="toggleOtherInput('hscMedium','hscMediumOther')">
+                <option value="">Select</option>
+                <option value="Tamil">Tamil</option>
+                <option value="English">English</option>
+                <option value="Hindi">Hindi</option>
+                <option value="Other">Other</option>
+              </select>
+              <input type="text" id="hscMediumOther" placeholder="Specify medium" class="edu-input" style="display:none; margin-top:8px;">
+            </div>
+            <div class="edu-field-group">
+              <label for="hscYear">Year of Passing</label>
+              <input type="number" id="hscYear" placeholder="YYYY" class="edu-input" min="1950" max="2100">
+            </div>
+          </div>
+        </div>
+        <!-- UG -->
+        <div id="ugSection" class="edu-card">
+          <div class="edu-header">
+            <h4 class="edu-title">03. UG (Undergraduate)</h4>
+            <label class="edu-checkbox-label">
+              <input type="checkbox" id="ugNilChk" class="edu-checkbox" onchange="toggleEducationFields('ug', this.checked)">
+              <span>Not applicable</span>
+            </label>
+          </div>
+          <div class="edu-fields">
+            <div class="edu-field-group">
+              <label for="ugCourse">Course/Degree</label>
+              <input type="text" id="ugCourse" placeholder="B.Tech, B.Com, B.A." class="edu-input">
+            </div>
+            <div class="edu-field-group">
+              <label for="ugSpecialization">Specialization/Branch</label>
+              <input type="text" id="ugSpecialization" placeholder="Civil Engineering, Commerce, etc" class="edu-input">
+            </div>
+            <div class="edu-field-group">
+              <label for="ugCollege">College Name</label>
+              <input type="text" id="ugCollege" placeholder="Enter college name" class="edu-input">
+            </div>
+            <div class="edu-field-group">
+              <label for="ugUniversity">University</label>
+              <input type="text" id="ugUniversity" placeholder="Enter university name" class="edu-input">
+            </div>
+            <div class="edu-field-group">
+              <label for="ugMedium">Medium</label>
+              <select id="ugMedium" class="edu-input" onchange="toggleOtherInput('ugMedium','ugMediumOther')">
+                <option value="">Select</option>
+                <option value="Tamil">Tamil</option>
+                <option value="English">English</option>
+                <option value="Hindi">Hindi</option>
+                <option value="Other">Other</option>
+              </select>
+              <input type="text" id="ugMediumOther" placeholder="Specify medium" class="edu-input" style="display:none; margin-top:8px;">
+            </div>
+            <div class="edu-field-group">
+              <label for="ugMode">Mode</label>
+              <select id="ugMode" class="edu-input">
+                <option value="">Select</option>
+                <option value="Regular">Regular</option>
+                <option value="Correspondence">Correspondence</option>
+              </select>
+            </div>
+            <div class="edu-field-group">
+              <label for="ugYear">Year of Passing</label>
+              <input type="number" id="ugYear" placeholder="YYYY" class="edu-input" min="1950" max="2100">
+            </div>
+          </div>
+        </div>
+        <!-- OTHER EDUCATION -->
+        <div id="otherEducationSection" class="edu-card">
+          <h4 class="edu-title" style="margin-bottom:20px;">04. Other Qualifications / Certifications</h4>
+          <div class="edu-fields">
+            <div class="edu-field-group">
+              <label for="otherQualName">Qualification / Certification Name</label>
+              <input type="text" id="otherQualName" placeholder="e.g., PMP, AWS Certified" class="edu-input">
+            </div>
+            <div class="edu-field-group">
+              <label for="otherQualInstitute">Institute / College Name</label>
+              <input type="text" id="otherQualInstitute" placeholder="Institute name" class="edu-input">
+            </div>
+            <div class="edu-field-group">
+              <label for="otherQualUniversity">University (if any)</label>
+              <input type="text" id="otherQualUniversity" placeholder="University name" class="edu-input">
+            </div>
+            <div class="edu-field-group">
+              <label for="otherQualMode">Mode</label>
+              <select id="otherQualMode" class="edu-input">
+                <option value="">Select</option>
+                <option value="Regular">Regular</option>
+                <option value="Correspondence">Correspondence</option>
+                <option value="Online">Online</option>
+              </select>
+            </div>
+            <div class="edu-field-group">
+              <label for="otherQualMedium">Medium</label>
+              <select id="otherQualMedium" class="edu-input" onchange="toggleOtherInput('otherQualMedium','otherQualMediumOther')">
+                <option value="">Select</option>
+                <option value="Tamil">Tamil</option>
+                <option value="English">English</option>
+                <option value="Hindi">Hindi</option>
+                <option value="Other">Other</option>
+              </select>
+              <input type="text" id="otherQualMediumOther" placeholder="Specify medium" class="edu-input" style="display:none; margin-top:8px;">
+            </div>
+            <div class="edu-field-group">
+              <label for="otherQualYear">Year</label>
+              <input type="number" id="otherQualYear" placeholder="YYYY" min="1950" max="2100" class="edu-input">
+            </div>
+          </div>
+          <button type="button" onclick="addOtherEducation()" class="edu-add-btn">+ Add Qualification</button>
+          <div id="otherEducationPreviewContainer"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 4 – FAMILY -->
+  <div class="step" id="step-4">
+    <div id="section-family" class="section-accordion">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div class="accordion-title">
+          <span>👨‍👩‍👧‍👦</span> Family Details
+          <span class="accordion-badge" id="badge-family">Required</span>
+        </div>
+        <span class="accordion-arrow">▼</span>
+      </div>
+      <div class="accordion-body">
+        <!-- FATHER (always required) -->
+        <div id="fatherSection" class="family-block">
+          <h4 class="family-heading">Father Details *</h4>
+          <div class="family-grid">
+            <div class="family-field">
+              <label for="fatherName">Full Name *</label>
+              <input type="text" id="fatherName" placeholder="Father's Full Name" required>
+            </div>
+            <div class="family-field">
+              <label for="fatherAge">Age *</label>
+              <input type="number" id="fatherAge" placeholder="Age" required min="1" max="120">
+            </div>
+            <div class="family-field">
+              <label for="fatherOccupation">Occupation *</label>
+              <input type="text" id="fatherOccupation" placeholder="Father's Occupation" required>
+            </div>
+            <div class="family-field">
+              <label for="fatherMaritalStatus">Marital Status *</label>
+              <select id="fatherMaritalStatus" required>
+                <option value="">Select</option>
+                <option value="Married">Married</option>
+                <option value="Single">Single</option>
+                <option value="Divorced">Divorced</option>
+                <option value="Widowed">Widowed</option>
+              </select>
+            </div>
+            <div class="family-field">
+              <label for="fatherLocation">Location *</label>
+              <input type="text" id="fatherLocation" placeholder="City / Town" required>
+            </div>
+            <div class="family-field">
+              <label for="fatherPhone">Phone Number *</label>
+              <input type="tel" id="fatherPhone" placeholder="10-digit number" maxlength="10" pattern="[0-9]{10}" required>
+            </div>
+          </div>
+        </div>
+
+        <!-- MOTHER (optional) -->
+        <div id="motherSection" class="family-block">
+          <h4 class="family-heading">Mother Details</h4>
+          <div class="family-grid">
+            <div class="family-field">
+              <label for="motherName">Full Name</label>
+              <input type="text" id="motherName" placeholder="Mother's Full Name">
+            </div>
+            <div class="family-field">
+              <label for="motherAge">Age</label>
+              <input type="number" id="motherAge" placeholder="Age" min="1" max="120">
+            </div>
+            <div class="family-field">
+              <label for="motherOccupation">Occupation</label>
+              <input type="text" id="motherOccupation" placeholder="Mother's Occupation">
+            </div>
+            <div class="family-field">
+              <label for="motherMaritalStatus">Marital Status</label>
+              <select id="motherMaritalStatus">
+                <option value="">Select</option>
+                <option value="Married">Married</option>
+                <option value="Single">Single</option>
+                <option value="Divorced">Divorced</option>
+                <option value="Widowed">Widowed</option>
+              </select>
+            </div>
+            <div class="family-field">
+              <label for="motherLocation">Location</label>
+              <input type="text" id="motherLocation" placeholder="City / Town">
+            </div>
+            <div class="family-field">
+              <label for="motherPhone">Phone Number</label>
+              <input type="tel" id="motherPhone" placeholder="10-digit number" maxlength="10" pattern="[0-9]{10}">
+            </div>
+          </div>
+        </div>
+
+        <!-- OTHER FAMILY MEMBERS -->
+        <div id="otherRelationshipSection" class="family-block">
+          <h4 class="family-heading">Other Family Members</h4>
+          <div class="family-grid other-family-inputs">
+            <div class="family-field">
+              <label for="otherRel">Relationship</label>
+              <select id="otherRel">
+                <option value="">Select</option>
+                <option value="Spouse">Spouse</option>
+                <option value="Son">Son</option>
+                <option value="Daughter">Daughter</option>
+                <option value="Brother">Brother</option>
+                <option value="Sister">Sister</option>
+                <option value="Grandfather">Grandfather</option>
+                <option value="Grandmother">Grandmother</option>
+                <option value="Uncle">Uncle</option>
+                <option value="Aunt">Aunt</option>
+                <option value="Cousin">Cousin</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="family-field">
+              <label for="otherName">Full Name</label>
+              <input type="text" id="otherName" placeholder="Full Name">
+            </div>
+            <div class="family-field">
+              <label for="otherAge">Age</label>
+              <input type="number" id="otherAge" placeholder="Age" min="1" max="120">
+            </div>
+            <div class="family-field">
+              <label for="otherOccupation">Occupation</label>
+              <input type="text" id="otherOccupation" placeholder="Occupation">
+            </div>
+            <div class="family-field">
+              <label for="otherLocation">Location</label>
+              <input type="text" id="otherLocation" placeholder="Location">
+            </div>
+            <div class="family-field">
+              <label for="otherMaritalStatus">Marital Status</label>
+              <select id="otherMaritalStatus">
+                <option value="">Select</option>
+                <option value="Single">Single</option>
+                <option value="Married">Married</option>
+                <option value="Divorced">Divorced</option>
+                <option value="Widowed">Widowed</option>
+              </select>
+            </div>
+            <div class="family-field">
+              <label for="otherPhone">Phone Number</label>
+              <input type="tel" id="otherPhone" placeholder="10-digit number" maxlength="10">
+            </div>
+          </div>
+          <button type="button" onclick="addOtherFamily()" class="family-add-btn">+ Add Family Member</button>
+          <div id="otherFamilyPreviewContainer"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /step-4 -->
+
+  <!-- STEP 5 – DETAILS & DOCS (Languages + Skills + Other + Docs) -->
+  <div class="step" id="step-5">
+    <div id="section-languages" class="section-accordion">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div class="accordion-title">
+          <span>🗣️</span> Languages
+          <span class="accordion-badge" id="badge-languages">Required</span>
+        </div>
+        <span class="accordion-arrow">▼</span>
+      </div>
+      <div class="accordion-body">
+        <label>Languages You Speak *</label>
+        <div id="languageSpeakGroup" style="margin:10px 0 16px 0; padding:12px; background:#f8f9fb; border-radius:8px;">
+          <label style="display:inline-flex; align-items:center; margin:0 16px 8px 0; font-weight:500;">
+            <input type="checkbox" name="languageSpeak" value="English" style="margin-right:6px;"> English
+          </label>
+          <label style="display:inline-flex; align-items:center; margin:0 16px 8px 0; font-weight:500;">
+            <input type="checkbox" name="languageSpeak" value="Tamil" style="margin-right:6px;"> Tamil
+          </label>
+          <label style="display:inline-flex; align-items:center; margin:0 16px 8px 0; font-weight:500;">
+            <input type="checkbox" name="languageSpeak" value="Hindi" style="margin-right:6px;"> Hindi
+          </label>
+          <label style="display:inline-flex; align-items:center; margin:0 16px 8px 0; font-weight:500;">
+            <input type="checkbox" name="languageSpeak" value="Others" id="langSpeakOthersChk" style="margin-right:6px;"> Others
+          </label>
+        </div>
+        <div id="otherSpeakGroup" style="display:none; margin-top:5px;">
+          <label for="otherSpeak">Other Spoken Language:
+            <input type="text" id="otherSpeak" name="otherSpeak" placeholder="Specify language">
+          </label>
+        </div>
+
+        <label>Languages You Write *</label>
+        <div id="languageWriteGroup" style="margin:10px 0 16px 0; padding:12px; background:#f8f9fb; border-radius:8px;">
+          <label style="display:inline-flex; align-items:center; margin:0 16px 8px 0; font-weight:500;">
+            <input type="checkbox" name="languageWrite" value="English" style="margin-right:6px;"> English
+          </label>
+          <label style="display:inline-flex; align-items:center; margin:0 16px 8px 0; font-weight:500;">
+            <input type="checkbox" name="languageWrite" value="Tamil" style="margin-right:6px;"> Tamil
+          </label>
+          <label style="display:inline-flex; align-items:center; margin:0 16px 8px 0; font-weight:500;">
+            <input type="checkbox" name="languageWrite" value="Hindi" style="margin-right:6px;"> Hindi
+          </label>
+          <label style="display:inline-flex; align-items:center; margin:0 16px 8px 0; font-weight:500;">
+            <input type="checkbox" name="languageWrite" value="Others" id="langWriteOthersChk" style="margin-right:6px;"> Others
+          </label>
+        </div>
+        <div id="otherWriteGroup" style="display:none; margin-top:5px;">
+          <label for="otherWrite">Other Written Language:
+            <input type="text" id="otherWrite" name="otherWrite" placeholder="Specify language">
+          </label>
+        </div>
+
+        <label for="knowCompany">How do you know this company? *</label>
+        <input type="text" id="knowCompany" name="knowCompany" required placeholder="e.g., Reference, LinkedIn, Job Portal">
+      </div>
+    </div>
+
+    <div id="section-skills" class="section-accordion">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div class="accordion-title">
+          <span>🛠️</span> Technical Skills &amp; Software
+          <span class="accordion-badge" id="badge-skills">Required</span>
+        </div>
+        <span class="accordion-arrow">▼</span>
+      </div>
+      <div class="accordion-body">
+        <table>
+          <tbody>
+            <tr>
+              <td data-label="Skill">
+                <label for="skillSelect" style="display:none;"></label>
+                <select id="skillSelect" onchange="toggleOtherSkill(this)">
+                  <option value="">Select Skill...</option>
+                  <option value="Excel">Excel</option>
+                  <option value="AutoCAD">AutoCAD</option>
+                  <option value="Sketching">Sketching</option>
+                  <option value="MS Projects">MS Projects</option>
+                  <option value="Primavera">Primavera</option>
+                  <option value="STAAD">STAAD</option>
+                  <option value="E-Tabs">E-Tabs</option>
+                  <option value="BIMS">BIMS</option>
+                  <option value="Revit">Revit</option>
+                  <option value="Surveying">Surveying</option>
+                  <option value="Using Auto Level">Using Auto Level</option>
+                  <option value="Total Station Operation">Total Station Operation</option>
+                  <option value="Other">Other</option>
+                </select>
+                <input type="text" id="otherSkill" placeholder="Specify skill" style="display:none; margin-top:8px;">
+              </td>
+              <td data-label="Proficiency">
+                <label for="skillProficiency" style="display:none;"></label>
+                <select id="skillProficiency">
+                  <option value="">Select Proficiency...</option>
+                  <option value="Excellent">Excellent</option>
+                  <option value="Good">Good</option>
+                  <option value="Average">Average</option>
+                </select>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <button type="button" onclick="addSkillPreview()">+ Add Skill</button>
+        <div id="skillPreviewContainer" style="margin-top:16px;">
+          <h4 style="font-size:14px; color:#2d5a8c; margin-bottom:10px;">Added Skills</h4>
+        </div>
+      </div>
+    </div>
+
+    <div id="section-other" class="section-accordion">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div class="accordion-title">
+          <span>📋</span> Other Details
+          <span class="accordion-badge" id="badge-other">Required</span>
+        </div>
+        <span class="accordion-arrow">▼</span>
+      </div>
+      <div class="accordion-body">
+        <label>1. Willing to work anywhere in Tamil Nadu? *
+          <select name="willing_tn" required>
+            <option value="">Select</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+        </label>
+
+        <label>2. Preferred work location: *
+          <input type="text" name="preferred_place" required placeholder="e.g., Chennai, Coimbatore">
+        </label>
+
+        <label>3. Will you stay in site camp? *
+          <select name="stay_in_camp" required>
+            <option value="">Select</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+        </label>
+
+        <label>4. Vehicle owned: *
+          <select name="vehicle_owned" id="vehicle_owned" required>
+            <option value="">Select</option>
+            <option>Two Wheeler</option>
+            <option>Four Wheeler</option>
+            <option>None</option>
+          </select>
+        </label>
+        <label id="licenseField" style="display:none;">License Number: *
+          <input type="text" name="license_no" placeholder="Enter license number">
+        </label>
+
+        <label>5. Any health problems? *
+          <select name="health_problem" id="health_problem" required>
+            <option value="">Select</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+        </label>
+        <label id="healthDetails" style="display:none;">Specify health problem:
+          <input type="text" name="health_problem_details" placeholder="Describe the issue">
+        </label>
+
+        <label>6. Physically challenged? *
+          <select name="physically_challenged" id="physically_challenged" required>
+            <option value="">Select</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+        </label>
+        <label id="physicalDetails" style="display:none;">Specify:
+          <input type="text" name="physically_challenged_details" placeholder="Describe">
+        </label>
+
+        <label>7. Reason for leaving previous employment: *</label>
+        <textarea name="reason_for_leaving" id="reason_for_leaving" rows="3" required maxlength="500" placeholder="Briefly explain your reason for leaving / applying here..."></textarea>
+        <div class="char-counter" id="cc-reason_for_leaving">0 / 500</div>
+
+        <label>8. References *</label>
+        <p style="font-size:13px; color:#5a7a9c; margin-bottom:10px;">Add at least one person who can vouch for your work.</p>
+        <div id="referenceContainer">
+          <div class="referenceRow" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <input type="text" name="ref_name[]" placeholder="Reference Name" style="border-radius:6px;">
+            <input type="text" name="ref_company[]" placeholder="Company" style="border-radius:6px;">
+            <input type="text" name="ref_designation[]" placeholder="Designation" style="border-radius:6px;">
+            <input type="tel" name="ref_contact[]" placeholder="Contact No" maxlength="10" style="border-radius:6px;">
+          </div>
+        </div>
+        <button type="button" onclick="addReference()">+ Add Reference</button>
+        <div id="referencePreview" style="margin-top:10px;"></div>
+
+        <!-- KNOWN PERSON — OPTIONAL -->
+        <h3 style="margin-top:24px;">9. Known Person in P&amp;C Group</h3>
+        <div id="knownPersonToggleRow">
+          <input type="checkbox" id="noKnownPersonChk" onchange="toggleKnownPerson(this.checked)">
+          <span>I don't know anyone working in P&amp;C Group of Companies</span>
+        </div>
+        <div id="knownPersonFields">
+          <label>Name: *
+            <input type="text" name="known_person_name" id="known_person_name" required placeholder="Person's full name">
+          </label>
+          <label>How Related: *
+            <select name="known_person_relationship" id="known_person_relationship" required>
+              <option value="">Select</option>
+              <option>Friend</option>
+              <option>Colleague</option>
+              <option>Father</option>
+              <option>Mother</option>
+              <option>Spouse</option>
+              <option>Son</option>
+              <option>Daughter</option>
+              <option>Brother</option>
+              <option>Sister</option>
+              <option>Other</option>
+            </select>
+          </label>
+          <div id="relativeDetail" style="display:none;">
+            <label>If Other, specify:
+              <input type="text" name="relative_type" placeholder="Specify relationship">
+            </label>
+          </div>
+          <label>Posted at which project in P&amp;C: *
+            <input type="text" name="known_person_project" id="known_person_project" required placeholder="Project name">
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div id="section-docs" class="section-accordion">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div class="accordion-title">
+          <span>📁</span> Documents &amp; Files
+          <span class="accordion-badge" id="badge-docs">Required</span>
+        </div>
+        <span class="accordion-arrow">▼</span>
+      </div>
+      <div class="accordion-body">
+        <!-- Aadhar -->
+        <label>Aadhar Card *</label>
+        <div class="file-upload-zone" id="zone-aadhar" ondragover="handleDragOver(event,'zone-aadhar')" ondragleave="handleDragLeave('zone-aadhar')" ondrop="handleDrop(event,'aadhar_upload','zone-aadhar')">
+          <label class="file-upload-label" for="aadhar_upload" style="cursor:pointer;">
+            <span class="file-upload-icon">🪪</span>
+            <span>Click or drag &amp; drop Aadhar Card</span>
+            <span style="font-size:12px; font-weight:400; color:#8a9ab0;">PDF, JPG, PNG accepted</span>
+          </label>
+          <input type="file" id="aadhar_upload" accept=".pdf,.jpg,.jpeg,.png" multiple onchange="handleFileSelect(this,'preview-aadhar')">
+        </div>
+        <div class="file-preview-list" id="preview-aadhar"></div>
+
+        <!-- Photo -->
+        <label style="margin-top:16px;">Your Photo (Passport Size) *</label>
+        <div class="file-upload-zone" id="zone-photo" ondragover="handleDragOver(event,'zone-photo')" ondragleave="handleDragLeave('zone-photo')" ondrop="handleDrop(event,'photo_upload','zone-photo')">
+          <label class="file-upload-label" for="photo_upload" style="cursor:pointer;">
+            <span class="file-upload-icon">🖼️</span>
+            <span>Click or drag &amp; drop your photo</span>
+            <span style="font-size:12px; font-weight:400; color:#8a9ab0;">JPG, PNG only</span>
+          </label>
+          <input type="file" id="photo_upload" accept="image/jpeg,image/jpg,image/png" onchange="handleFileSelect(this,'preview-photo')">
+        </div>
+        <div class="file-preview-list" id="preview-photo"></div>
+
+        <!-- Resume -->
+        <label style="margin-top:16px;">Resume *</label>
+        <div class="file-upload-zone" id="zone-resume" ondragover="handleDragOver(event,'zone-resume')" ondragleave="handleDragLeave('zone-resume')" ondrop="handleDrop(event,'resume_upload','zone-resume')">
+          <label class="file-upload-label" for="resume_upload" style="cursor:pointer;">
+            <span class="file-upload-icon">📄</span>
+            <span>Click or drag &amp; drop your Resume</span>
+            <span style="font-size:12px; font-weight:400; color:#8a9ab0;">PDF, DOC, DOCX accepted</span>
+          </label>
+          <input type="file" id="resume_upload" accept=".pdf,.doc,.docx" multiple onchange="handleFileSelect(this,'preview-resume')">
+        </div>
+        <div class="file-preview-list" id="preview-resume"></div>
+
+        <!-- Additional Docs -->
+        <label style="margin-top:16px;">Additional Documents (Certificates, etc.)</label>
+        <div class="file-upload-zone" id="zone-docs" ondragover="handleDragOver(event,'zone-docs')" ondragleave="handleDragLeave('zone-docs')" ondrop="handleDrop(event,'documents_input','zone-docs')">
+          <label class="file-upload-label" for="documents_input" style="cursor:pointer;">
+            <span class="file-upload-icon">📂</span>
+            <span>Click or drag &amp; drop additional files</span>
+            <span style="font-size:12px; font-weight:400; color:#8a9ab0;">PDF, JPG, PNG, DOC, XLSX — multiple allowed</span>
+          </label>
+          <input type="file" id="documents_input" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xlsx" multiple onchange="handleFileSelect(this,'preview-docs')">
+        </div>
+        <div class="file-preview-list" id="preview-docs"></div>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- /step-5 -->
+
+
+</div> <!-- stepsContainer -->
+
+<!-- NAVIGATION BUTTONS -->
+<div id="stepNav" style="display: flex; justify-content: center; align-items: center; gap: 16px; margin: 30px 0 10px;">
+  <button type="button" id="prevBtn" onclick="prevStep()" style="width: auto; min-width: 100px;">← Previous</button>
+  <button type="button" id="nextBtn" onclick="nextStep()" style="width: auto; min-width: 100px;">Next →</button>
+  <button type="submit" id="submitBtn" style="display: none; width: auto; min-width: 240px;">✅ Submit Application</button>
+</div>
+
+<!-- TEST BUTTON (DEV) -->
+<button type="button" onclick="autoFillTest()" id="devTestBtn" style="background:linear-gradient(135deg,#16a34a,#15803d)!important; margin-top:20px;">🧪 TEST AUTO FILL (DEV)</button>
+
+<!-- LOADING OVERLAY -->
+<div id="loadingOverlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,0.85);backdrop-filter:blur(6px);display:none;justify-content:center;align-items:center;flex-direction:column;z-index:9999;">
+  <div class="spinner"></div>
+  <div style="margin-top:18px;font-size:18px;color:#1e3a5f;font-weight:700;">⏳ Submitting, please wait...</div>
+  <div style="font-size:13px;color:#5a7a9c;margin-top:6px;">Do not close or refresh this page</div>
+</div>
+
+</form>
+</div>
+
+<script src="on(1).js"></script>
+</body>
+</html>
